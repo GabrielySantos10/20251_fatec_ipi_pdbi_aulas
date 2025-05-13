@@ -1,17 +1,84 @@
-CREATE OR REPLACE PROCEDURE sp_cadastrar_cliente
-(IN p_nome VARCHAR(200), IN p_cod_cliente INT DEFAULT NULL)
+CREATE OR REPLACE PROCEDURE sp_calcular_valor_de_um_pedido(
+  IN p_cod_pedido INT, OUT p_valor_total INT
+)
 LANGUAGE plpgsql
-AS $$
+AS
+$$
 BEGIN
-  IF p_cod_cliente IS NULL THEN
-    INSERT INTO tb_cliente (nome) VALUES (p_nome);
-  ELSE
-    INSERT INTO tb_cliente 
-    (cod_cliente, nome) VALUES
-    (p_cod_cliente, p_nome);
-  END IF;
+  SELECT SUM(i.valor) FROM
+  tb_pedido p 
+  INNER JOIN tb_item_pedido ip 
+  ON p.cod_pedido = ip.cod_pedido
+  INNER JOIN  tb_item i 
+  ON ip.cod_item = i.cod_item
+  WHERE p.cod_pedido = p_cod_pedido
+  INTO $2;
 END;
 $$
+-- CALL sp_adicionar_item_a_pedido(1,1)
+
+-- SELECT * FROM tb_item_pedido;
+-- SELECT * FROM tb_pedido;
+
+-- --  LIGA O(S) ITEM(NS) AO PEDIDO
+-- CREATE OR REPLACE PROCEDURE sp_adicionar_item_a_pedido(
+--   IN p_cod_item INT, IN p_cod_pedido INT 
+-- )
+-- LANGUAGE plpgsql
+-- AS
+-- $$
+-- BEGIN
+--    INSERT INTO tb_item_pedido (cod_item, cod_pedido)
+--    VALUES($1,$2);
+--    UPDATE tb_pedido p SET
+--     data_modificacao = CURRENT_TIMESTAMP
+--     WHERE p.cod_pedido = $2;
+-- END;
+-- $$
+--select  * from tb_pedido;
+
+-- INSERT INTO tb_cliente (nome) VALUES ('Ana Silva');
+-- SELECT * FROM tb_cliente
+
+-- DO
+-- $$
+-- DECLARE
+--   v_cod_pedido INT;
+--   v_cod_cliente INT;
+-- BEGIN
+--   SELECT c.cod_cliente FROM tb_cliente c 
+--     WHERE nome LIKE 'Ana Silva' INTO v_cod_cliente;
+--   CALL sp_criar_pedido(v_cod_pedido,v_cod_cliente);
+--   RAISE NOTICE 'Código do Pedido recém criado: %', v_cod_pedido;
+-- END;
+-- $$
+
+-- CREATE OR REPLACE PROCEDURE sp_criar_pedido(
+--   OUT p_cod_pedido INT, IN p_cod_cliente INT
+-- )
+-- LANGUAGE plpgsql
+-- AS 
+-- $$
+-- BEGIN
+--   INSERT INTO tb_pedido(cod_cliente) VALUES(p_cod_cliente);
+--   SELECT LASTVAL()INTO p_cod_pedido; --pega e armazena o serial number de uma tabela
+-- END;
+-- $$
+
+-- CREATE OR REPLACE PROCEDURE sp_cadastrar_cliente
+-- (IN p_nome VARCHAR(200), IN p_cod_cliente INT DEFAULT NULL)
+-- LANGUAGE plpgsql
+-- AS $$
+-- BEGIN
+--   IF p_cod_cliente IS NULL THEN
+--     INSERT INTO tb_cliente (nome) VALUES (p_nome);
+--   ELSE
+--     INSERT INTO tb_cliente 
+--     (cod_cliente, nome) VALUES
+--     (p_cod_cliente, p_nome);
+--   END IF;
+-- END;
+-- $$
 
 -- CREATE TABLE tb_item_pedido(
 --   --surrogate key
