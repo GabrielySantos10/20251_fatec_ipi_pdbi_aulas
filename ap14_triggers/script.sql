@@ -1,3 +1,98 @@
+
+-- UPDATE tb_pessoa
+-- SET saldo = 300
+-- WHERE cod_pessoa = 5;
+
+-- CREATE OR REPLACE TRIGGER tg_log_pessoa_update
+-- AFTER UPDATE ON tb_pessoa
+-- FOR EACH ROW 
+-- EXECUTE PROCEDURE fn_log_pessoa_update();
+
+
+-- CREATE OR REPLACE FUNCTION fn_log_pessoa_update()
+-- RETURNS TRIGGER
+-- LANGUAGE PLPGSQL
+-- AS 
+-- $$
+-- BEGIN
+--     INSERT INTO tb_auditoria
+--     (cod_pessoa, nome, idade, saldo, saldo_antigo, saldo_atual)
+--     VALUES
+--     (NEW.cod_pessoa, NEW.nome, NEW.idade, OLD.saldo, NEW.saldo);
+--     RETURN NEW; 
+-- END;
+-- $$
+
+-- INSERT INTO tb_pessoa(nome, idade, saldo) VALUES
+-- ('Ana', 20, 100),
+-- ('Paula', 30, 200),
+-- ('Isabela', 20, 500);
+
+
+--  ALTER TABLE tb_auditoria ADD COLUMN IF NOT EXISTS nome VARCHAR(200) NOT NULL;
+
+-- CREATE OR REPLACE TRIGGER tg_log_pessoa_insert
+-- AFTER INSERT ON tb_pessoa
+-- FOR EACH ROW
+-- EXECUTE PROCEDURE fn_log_pessoa_insert();
+
+-- CREATE OR REPLACE FUNCTION fn_log_pessoa_insert()
+-- RETURNS TRIGGER
+-- LANGUAGE plpgsql AS $$
+-- BEGIN
+--     INSERT INTO tb_auditoria
+--     (cod_pessoa, nome, idade, saldo_antigo, saldo_atual)
+--     VALUES
+--     (NEW.cod_pessoa, NEW.nome, NEW.idade, NULL, NEW.saldo);
+--     RETURN NULL;
+-- END;
+-- $$
+-- escrever uma function que devlve trigger 
+-- é uma função de validação de saldo
+-- se o saldo for pelo menos 0, deixar a operação acontecer
+-- caso contrário, não deixar 
+-- além disso, exibir o saldo, caso seja inválido
+
+-- INSERT INTO tb_pessoa(nome, idade, saldo) VALUES
+-- ('João', 20, 100), 
+-- ('Maria', 22, 400), 
+-- ('Pedro', 22, - 100);
+
+-- CREATE OR REPLACE TRIGGER tg_validador_de_saldo
+-- BEFORE INSERT OR UPDATE ON tb_pessoa 
+-- FOR EACH ROW --  FOR ROW OR FOER EACH ROW
+-- EXECUTE PROCEDURE fn_validador_de_saldo();
+
+-- CREATE OR REPLACE FUNCTION fn_validador_de_saldo()
+-- RETURNS TRIGGER
+-- LANGUAGE plpgsql
+-- AS $$
+-- BEGIN
+--     IF  NEW.saldo >= 0 THEN 
+--         RETURN NEW;
+--     ELSE
+--         RAISE NOTICE 'Valor de saldo R$% inválido!', NEW.saldo;
+--     RETURN NULL;
+--     END IF;
+-- END;
+-- $$
+
+-- DROP TABLE IF EXISTS tb_pessoa;
+-- CREATE TABLE tb_pessoa(
+--     cod_pessoa SERIAL PRIMARY KEY,
+--     nome VARCHAR(200) NOT NULL,
+--     idade INT NOT NULL,
+--     saldo NUMERIC(10,2) NOT NULL
+-- );
+
+-- CREATE TABLE tb_auditoria(
+--     cod__auditoria SERIAL PRIMARY KEY,
+--     cod_pessoa INT NOT NULL,
+--     idade INT NOT NULL,
+--     saldo_antigo NUMERIC(10,2),
+--     saldo_atual NUMERIC(10,2) NOT NULL
+-- );
+
 -- UPDATE tb_teste_trigger SET texto = 'texto atualizado'
 -- WHERE cod_teste_trigger IN(1,2,3);
 
